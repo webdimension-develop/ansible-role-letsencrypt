@@ -1,0 +1,8 @@
+---
+# defaults file for roles/letsencrypt
+# web_server: httpd
+# document_root: '/var/www/html'
+web_server: nginx
+document_root: '/usr/share/nginx/html'
+fqdn: n1.webdimension.jp
+email: garaccii@gmail.com

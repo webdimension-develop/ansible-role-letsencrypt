@@ -1,0 +1,20 @@
+---
+# handlers file for roles/letsencrypt
+
+- name: Restart nginx
+  become: true
+  service:
+    name: nginx
+    state: restarted
+
+- name: Restart httpd
+  become: true
+  service:
+    name: httpd
+    state: restarted
+
+- name: Restart firewalld
+  become: true
+  service:
+    name: firewalld
+    state: restarted

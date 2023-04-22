@@ -1,0 +1,12 @@
+- name: Replace ssl.conf configure
+  become: true
+  replace:
+    path: /etc/httpd/conf.d/ssl.conf
+    regexp: "^{{ item.key }}.*"
+    replace: "{{ item.key }} {{ item.file }}"
+  with_items:
+    - key: SSLCertificateFile
+      file: "/etc/pki/tls/certs/{{ fqdn }}/{{ fqdn }}.crt"
+    - key: SSLCertificateKeyFile
+      file: "/etc/pki/tls/certs/{{ fqdn }}/{{ fqdn }}.key"
+  notify: Restart httpd

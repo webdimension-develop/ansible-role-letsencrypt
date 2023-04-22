@@ -1,0 +1,117 @@
+---
+# tasks file for roles/letsencrypt
+- name: Install httpd
+  become: true
+  dnf:
+    name:
+      - httpd
+      - mod_ssl
+      - redhat-rpm-config
+      - gcc
+      - libffi-devel
+      - python3-devel
+      - openssl-devel
+      - cargo
+      - pkg-config
+    state: present
+
+- name: Install bottle python package
+  become: true
+  ansible.builtin.pip:
+    name: cryptography
+
+    # - name: enable ssl
+    #   community.general.apache2_module:
+    #     state: present
+    #     name: ssl
+    # ^^^ require "a2enmod" but not found on yum/rpm linux
+
+- name: Create directory
+  become: true
+  file:
+    state: directory
+    path: "/etc/pki/tls/certs/{{ fqdn }}"
+    mode: "0773"
+
+- name: Create account private key
+  become: true
+  community.crypto.openssl_privatekey:
+    path: "/etc/pki/tls/certs/{{ fqdn }}/account.key"
+
+- name: Create server key
+  become: true
+  community.crypto.openssl_privatekey:
+    path: "/etc/pki/tls/certs/{{ fqdn }}/{{ fqdn }}.key"
+
+- name: Create csr
+  become: true
+  community.crypto.openssl_csr:
+    path: "/etc/pki/tls/certs/{{ fqdn }}/{{ fqdn }}.csr"
+    privatekey_path: "/etc/pki/tls/certs/{{ fqdn }}/{{ fqdn }}.key"
+    common_name: "{{ fqdn }}"
+
+- name: Create a challenge for fqdn using a account key file.
+  become: true
+  community.crypto.acme_certificate:
+    account_key_src: "/etc/pki/tls/certs/{{ fqdn }}/account.key"
+    account_email: "{{ email }}"
+    csr: "/etc/pki/tls/certs/{{ fqdn }}/{{ fqdn }}.csr"
+    dest: "/etc/pki/tls/certs/{{ fqdn }}/{{ fqdn }}.crt"
+    # acme_directory: https://acme-v01.api.letsencrypt.org/directory    ### 403 error
+    acme_directory: https://acme-v02.api.letsencrypt.org/directory
+    acme_version: 2
+    terms_agreed: true
+    # Renew if the certificate is at least 30 days old
+    remaining_days: 60
+  register: acme_challenge
+
+- name: Dump acme_challenge
+  become: true
+  debug:
+    msg: "{{ acme_challenge }}"
+
+- name: Create challenge path
+  become: true
+  file:
+    state: directory
+    path: "{{ document_root }}/{{ acme_challenge['challenge_data'][fqdn]['http-01']['resource'] | dirname }}"
+    mode: "0775"
+  when: acme_challenge is changed
+
+- name: Create challenge data to server
+  become: true
+  copy:
+    dest: "{{ document_root }}/{{ acme_challenge['challenge_data'][fqdn]['http-01']['resource'] }}"
+    content: "{{ acme_challenge['challenge_data'][fqdn]['http-01']['resource_value'] }}"
+    mode: "0775"
+  when: acme_challenge is changed and fqdn in acme_challenge['challenge_data']
+
+- name: Let the challenge be validated and retrieve the cert and intermediate certificate
+  become: true
+  community.crypto.acme_certificate:
+    acme_directory: https://acme-v02.api.letsencrypt.org/directory
+    acme_version: 2
+    terms_agreed: true
+    account_key_src: "/etc/pki/tls/certs/{{ fqdn }}/account.key"
+    csr: "/etc/pki/tls/certs/{{ fqdn }}/{{ fqdn }}.csr"
+    dest: "/etc/pki/tls/certs/{{ fqdn }}/{{ fqdn }}.crt"
+    data: "{{ acme_challenge }}"
+  when: acme_challenge is changed
+  notify: Restart firewalld
+
+- name: Permit traffic in default zone for https/http
+  become: true
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  with_items:
+    - https
+    - http
+  notify: Restart firewalld
+
+- name: Include_tasks
+  include_tasks: "{{ ansible_distribution | lower }}{{ ansible_distribution_major_version }}/{{ web_server }}.yml"
+#  when:
+#    - acme_challenge is defined"
