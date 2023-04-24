@@ -1,12 +1,9 @@
 - name: Replace ssl.conf configure
   become: true
-  replace:
-    path: /etc/httpd/conf.d/ssl.conf
-    regexp: "^{{ item.key }}.*"
-    replace: "{{ item.key }} {{ item.file }}"
-  with_items:
-    - key: SSLCertificateFile
-      file: "/etc/pki/tls/certs/{{ fqdn }}/{{ fqdn }}.crt"
-    - key: SSLCertificateKeyFile
-      file: "/etc/pki/tls/certs/{{ fqdn }}/{{ fqdn }}.key"
+  ansible.builtin.template:
+    src: templates/httpd.conf.j2
+    dest: "/etc/httpd/conf.d/{{ fqdn }}.conf"
+    owner: apache
+    group: apache
+    mode: '0644'
   notify: Restart httpd

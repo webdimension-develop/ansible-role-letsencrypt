@@ -1,10 +1,9 @@
 ---
 # tasks file for roles/letsencrypt
-- name: Install httpd
+- name: Install openssl
   become: true
   dnf:
     name:
-      - httpd
       - mod_ssl
       - redhat-rpm-config
       - gcc

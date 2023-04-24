@@ -2,7 +2,8 @@
 # defaults file for roles/letsencrypt
 # web_server: httpd
 # document_root: '/var/www/html'
-web_server: nginx
-document_root: '/usr/share/nginx/html'
+# web_server: nginx
+web_server: httpd
+document_root: '/var/www/html/project/fw/laravel9/public'
 fqdn: "{{ secret.letsencrypt.fqdn }}"
 email: "{{ secret.letsencrypt.email }}"
