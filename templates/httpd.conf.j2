@@ -1,28 +1,28 @@
 <VirtualHost *:80>
-DocumentRoot {{ document_root }}
-ServerName {{ fqdn }}
+DocumentRoot {{ letsencrypt_document_root }}
+ServerName {{ letsencrypt_fqdn }}
 RewriteEngine on
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
-<Directory "{{ document_root }}">
+<Directory "{{ letsencrypt_document_root }}">
 allow from all
 Options +Indexes
 </Directory>
-# ErrorLog /var/log/httpd/{{ fqdn }}/error_log
-# CustomLog /var/log/httpd/{{ fqdn }}/access_log combined
+# ErrorLog /var/log/httpd/{{ letsencrypt_fqdn }}/error_log
+# CustomLog /var/log/httpd/{{ letsencrypt_fqdn }}/access_log combined
 </VirtualHost>
 
 <VirtualHost *:443>
-DocumentRoot {{ document_root }}
-ServerName {{ fqdn }}
-<Directory "{{ document_root }}">
+DocumentRoot {{ letsencrypt_document_root }}
+ServerName {{ letsencrypt_fqdn }}
+<Directory "{{ letsencrypt_document_root }}">
 allow from all
 Options +Indexes
 </Directory>
 SSLEngine on
-SSLCertificateFile /etc/pki/tls/certs/{{ fqdn }}/{{ fqdn }}.crt
-SSLCertificateKeyFile /etc/pki/tls/certs/{{ fqdn }}/{{ fqdn }}.key
-# SSLCertificateChainFile /etc/pki/tls/certs/{{ fqdn }}/{{ fqdn }}.chain
-# ErrorLog /var/log/httpd/{{ fqdn }}/error_log
-# CustomLog /var/log/httpd/{{ fqdn }}/access_log combined
+SSLCertificateFile /etc/pki/tls/certs/{{ letsencrypt_fqdn }}/{{ letsencrypt_fqdn }}.crt
+SSLCertificateKeyFile /etc/pki/tls/certs/{{ letsencrypt_fqdn }}/{{ letsencrypt_fqdn }}.key
+# SSLCertificateChainFile /etc/pki/tls/certs/{{ letsencrypt_fqdn }}/{{ letsencrypt_fqdn }}.chain
+# ErrorLog /var/log/httpd/{{ letsencrypt_fqdn }}/error_log
+# CustomLog /var/log/httpd/{{ letsencrypt_fqdn }}/access_log combined
 </VirtualHost>

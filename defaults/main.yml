@@ -3,7 +3,7 @@
 # web_server: httpd
 # document_root: '/var/www/html'
 # web_server: nginx
-web_server: httpd
-document_root: '/var/www/html/project/fw/laravel9/public'
-fqdn: "{{ secret.letsencrypt.fqdn }}"
-email: "{{ secret.letsencrypt.email }}"
+letsencrypt_web_server: httpd
+letsencrypt_document_root: '/var/www/html/project/fw/laravel9/public'
+letsencrypt_fqdn: "{{ secret.letsencrypt.fqdn }}"
+letsencrypt_email: "{{ secret.letsencrypt.email }}"

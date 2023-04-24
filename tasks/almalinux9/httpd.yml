@@ -2,7 +2,7 @@
   become: true
   ansible.builtin.template:
     src: templates/httpd.conf.j2
-    dest: "/etc/httpd/conf.d/{{ fqdn }}.conf"
+    dest: "/etc/httpd/conf.d/{{ letsencrypt_fqdn }}.conf"
     owner: apache
     group: apache
     mode: '0644'

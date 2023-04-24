@@ -1,14 +1,14 @@
 server {
   listen 80;
-  server_name {{ fqdn }};
+  server_name {{ letsencrypt_fqdn }};
   return 301 https://$host$request_uri;
 }
 
 server {
   listen 443 ssl;
-  ssl_certificate     /etc/pki/tls/certs/{{ fqdn }}/{{ fqdn }}.crt;
-  ssl_certificate_key /etc/pki/tls/certs/{{ fqdn }}/{{ fqdn }}.key;
-  server_name {{ fqdn }};
-  root {{ document_root }};
+  ssl_certificate     /etc/pki/tls/certs/{{ letsencrypt_fqdn }}/{{ letsencrypt_fqdn }}.crt;
+  ssl_certificate_key /etc/pki/tls/certs/{{ letsencrypt_fqdn }}/{{ letsencrypt_fqdn }}.key;
+  server_name {{ letsencrypt_fqdn }};
+  root {{ letsencrypt_document_root }};
   index index.html;
 }
